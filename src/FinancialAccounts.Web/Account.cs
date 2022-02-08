@@ -7,7 +7,10 @@ namespace FinancialAccounts.Web
         public DateTime BirthDate { get; set; }
 
         public string Family { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
+
         public string Name { get; set; }
 
         public string SecondName { get; set; }

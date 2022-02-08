@@ -8,6 +8,6 @@
 
         Task<Account?> Register(Account account);
 
-        Task<bool> Withdraw(int id, decimal amount);
+        Task<decimal> Deposit(int id, decimal amount);
     }
 }

@@ -19,7 +19,7 @@ namespace FinancialAccounts.Web.Controllers
         public async Task<ActionResult<decimal>> CheckSum(int id)
         {
             var checkSum = await _repository.CheckSum(id).ConfigureAwait(false);
-            return checkSum == default ? new NotFoundResult() : new ActionResult<decimal>(checkSum);
+            return checkSum == AccountConstants.DEFAULT_VALUE ? new NotFoundResult() : Ok(checkSum);
         }
 
         [HttpDelete("api/v1/account/{id:int}")]
@@ -39,10 +39,10 @@ namespace FinancialAccounts.Web.Controllers
 
         [HttpPut]
         [Route("api/v1/account/{id:int}")]
-        public async Task<ActionResult> Withdraw(int id, decimal sum)
+        public async Task<ActionResult<decimal>> Deposit(int id, decimal sum)
         {
-            var withdraw = await _repository.Withdraw(id, sum).ConfigureAwait(false);
-            return withdraw ? Ok() : NotFound();
+            var withdraw = await _repository.Deposit(id, sum).ConfigureAwait(false);
+            return withdraw != AccountConstants.DEFAULT_VALUE ? Ok(withdraw): BadRequest();
         }
     }
 }
