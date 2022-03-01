@@ -12,10 +12,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
   <ItemGroup>
-    <InternalsVisibleTo Include="FinancialAccounts.Tests"/>
+    <InternalsVisibleTo Include="FinancialAccounts.Tests" />
   </ItemGroup>
 
 </Project>

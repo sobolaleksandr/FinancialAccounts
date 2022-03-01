@@ -2,25 +2,44 @@
 
 using Microsoft.EntityFrameworkCore;
 
+/// <inheritdoc />
 public class AccountRepository : IAccountRepository
 {
-    private readonly ApplicationContext _context;
-    private readonly object _balanceLock = new();
+    /// <summary>
+    /// Объект для синхронизации потоков.
+    /// </summary>
+    private static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
 
+    /// <summary>
+    /// Контекст приложения.
+    /// </summary>
+    private readonly ApplicationContext _context;
+
+    /// <summary>
+    /// Создать экземпляр <see cref="AccountRepository"/>.
+    /// </summary>
+    /// <param name="context"> Контекст приложения. </param>
     public AccountRepository(ApplicationContext context)
     {
         _context = context;
     }
 
+    /// <inheritdoc />
     public async Task<decimal> CheckSum(int id)
     {
-        var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
-        lock (_balanceLock)
+        await SemaphoreSlim.WaitAsync();
+        try
         {
+            var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
             return account?.Sum ?? AccountConstants.DEFAULT_VALUE;
+        }
+        finally
+        {
+            SemaphoreSlim.Release();
         }
     }
 
+    /// <inheritdoc />
     public async Task<bool> Delete(int id)
     {
         var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
@@ -33,34 +52,42 @@ public class AccountRepository : IAccountRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (DbUpdateException exception)
+        catch (DbUpdateException)
         {
             return false;
         }
     }
 
-    public async Task<decimal> Deposit(int id, decimal amount)
+    /// <inheritdoc />
+    public async Task<bool> Deposit(int id, decimal amount)
     {
-        var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
-        lock (_balanceLock)
-        {
-            if (account == null || account.Sum + amount < 0)
-                return AccountConstants.DEFAULT_VALUE;
-
-            account.Sum += amount;
-        }
+        await SemaphoreSlim.WaitAsync();
 
         try
         {
+            var account = await _context.Accounts.FindAsync(id);
+            if (account == null || account.Sum + amount < 0)
+                return false;
+
+            if (amount == 0)
+                return true;
+
+            account.Sum += amount;
+
             await _context.SaveChangesAsync();
-            return account.Sum;
+            return true;
         }
-        catch (DbUpdateException exception)
+        catch (DbUpdateException)
         {
-            return AccountConstants.DEFAULT_VALUE;
+            return false;
+        }
+        finally
+        {
+            SemaphoreSlim.Release();
         }
     }
 
+    /// <inheritdoc />
     public async Task<Account?> Register(Account account)
     {
         var entry = await _context.Accounts.AddAsync(account).ConfigureAwait(false);
@@ -69,7 +96,7 @@ public class AccountRepository : IAccountRepository
             await _context.SaveChangesAsync();
             return entry.Entity;
         }
-        catch (DbUpdateException exception)
+        catch (DbUpdateException)
         {
             return null;
         }

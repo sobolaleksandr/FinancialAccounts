@@ -9,7 +9,7 @@ public class Startup
         Configuration = configuration;
     }
 
-    public IConfiguration Configuration { get; }
+    private IConfiguration Configuration { get; }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {

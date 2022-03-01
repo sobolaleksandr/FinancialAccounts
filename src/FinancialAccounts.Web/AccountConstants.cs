@@ -1,7 +1,12 @@
-﻿namespace FinancialAccounts.Web
+﻿namespace FinancialAccounts.Web;
+
+/// <summary>
+/// Константы приложения.
+/// </summary>
+public static class AccountConstants
 {
-    public static class AccountConstants
-    {
-        public const decimal DEFAULT_VALUE = -1;
-    }
+    /// <summary>
+    /// Баланс, возвращаемый по-умолчанию.
+    /// </summary>
+    public const decimal DEFAULT_VALUE = -1;
 }

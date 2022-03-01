@@ -25,7 +25,10 @@ namespace FinancialAccounts.Web.Migrations
             modelBuilder.Entity("FinancialAccounts.Web.Account", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
@@ -43,7 +46,7 @@ namespace FinancialAccounts.Web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Sum")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.HasKey("Id");
 
