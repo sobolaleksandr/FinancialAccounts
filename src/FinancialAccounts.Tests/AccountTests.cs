@@ -63,7 +63,7 @@ public class AccountTests
     /// Создать запрос.
     /// </summary>
     /// <param name="account"> Модель. </param>
-    /// <param name="method"> <see cref="HttpMethod"/></param>
+    /// <param name="method"> <see cref="HttpMethod"/>. </param>
     /// <param name="requestUri"> Строка запроса. </param>
     /// <returns> Запрос. </returns>
     private static HttpRequestMessage CreateRequest(Account account, HttpMethod method, string requestUri)
@@ -110,10 +110,10 @@ public class AccountTests
     {
         for (var id = MIN_ID; id < MAX_ID; id++)
         {
-            var getRequest = new HttpRequestMessage(HttpMethod.Get, REQUEST_URI + id);
-            var getResponse = await _client.SendAsync(getRequest).ConfigureAwait(false);
-            if (getResponse.StatusCode == HttpStatusCode.NotFound)
-                await CreateAccount(id);
+            var request = new HttpRequestMessage(HttpMethod.Get, REQUEST_URI + id);
+            var response = await _client.SendAsync(request).ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                await CreateAccount(id).ConfigureAwait(false);
         }
     }
 
@@ -133,7 +133,7 @@ public class AccountTests
         };
 
         var request = CreateRequest(account, HttpMethod.Post, REQUEST_URI);
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request).ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -153,14 +153,14 @@ public class AccountTests
                 tasks[i] = Task.Run(() => Deposit(index));
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var sum = await CheckSum(id);
+            var sum = await CheckSum(id).ConfigureAwait(false);
             Assert.Equal(1100, sum);
 
             var request = CreateDepositRequest(id, -100);
             await _client.SendAsync(request).ConfigureAwait(false);
-            var changedSum = await CheckSum(id);
+            var changedSum = await CheckSum(id).ConfigureAwait(false);
             Assert.Equal(1000, changedSum);
         }
     }
@@ -174,7 +174,7 @@ public class AccountTests
     {
         var request = new HttpRequestMessage(HttpMethod.Get, REQUEST_URI + id);
         var response = await _client.SendAsync(request).ConfigureAwait(false);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         var formattedContent = content.Replace(".", ",");
         return decimal.Parse(formattedContent);
     }
@@ -188,8 +188,8 @@ public class AccountTests
     {
         for (var i = 0; i < 10; i++)
         {
-            await CreateAccounts();
-            await TestDeposit();
+            await CreateAccounts().ConfigureAwait(false);
+            await TestDeposit().ConfigureAwait(false);
         }
     }
 }

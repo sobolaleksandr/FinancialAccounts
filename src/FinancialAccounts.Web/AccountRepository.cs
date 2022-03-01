@@ -27,7 +27,7 @@ public class AccountRepository : IAccountRepository
     /// <inheritdoc />
     public async Task<decimal> CheckSum(int id)
     {
-        await SemaphoreSlim.WaitAsync();
+        await SemaphoreSlim.WaitAsync().ConfigureAwait(false);
         try
         {
             var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
@@ -49,7 +49,7 @@ public class AccountRepository : IAccountRepository
         try
         {
             _context.Accounts.Remove(account);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
         catch (DbUpdateException)
@@ -61,11 +61,11 @@ public class AccountRepository : IAccountRepository
     /// <inheritdoc />
     public async Task<bool> Deposit(int id, decimal amount)
     {
-        await SemaphoreSlim.WaitAsync();
+        await SemaphoreSlim.WaitAsync().ConfigureAwait(false);
 
         try
         {
-            var account = await _context.Accounts.FindAsync(id);
+            var account = await _context.Accounts.FindAsync(id).ConfigureAwait(false);
             if (account == null || account.Sum + amount < 0)
                 return false;
 
@@ -74,7 +74,7 @@ public class AccountRepository : IAccountRepository
 
             account.Sum += amount;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
         catch (DbUpdateException)
@@ -93,7 +93,7 @@ public class AccountRepository : IAccountRepository
         var entry = await _context.Accounts.AddAsync(account).ConfigureAwait(false);
         try
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
             return entry.Entity;
         }
         catch (DbUpdateException)
